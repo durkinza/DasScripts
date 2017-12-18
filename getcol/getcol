@@ -1,0 +1,62 @@
+#!/usr/bin/env python3
+from optparse import OptionParser, SUPPRESS_HELP
+import sys
+
+def main():
+    parser = OptionParser(version="%prog 1.0")
+    parser.add_option("-i", "--insep", dest="insep",
+                                type="string", metavar="STR", action="store",
+                                help="input separator",
+                                default=" ")
+    parser.add_option("-o", "--outsep", dest="outsep",
+                                type="string", metavar="STR", action="store",
+                                help="output separator",
+                                default=" ")
+    parser.add_option("-l", "--lastsep", dest="lastsep",
+                                type="string", metavar="STR", action="store",
+                                help="last output serparator",
+                                default="")
+    parser.add_option("-s", dest="strip", action="store_true",
+                                help="strip each input column of whitespace",
+                                default=False)
+    parser.add_option("-r", dest="reverse", action="store_true",
+                                help="allow printing columns in reverse order",
+                                default=False)
+    (options, args) = parser.parse_args()
+    # parse the arguments
+    # read in the file
+    lines = sys.stdin.readlines()
+
+    #print(options)
+    #print(args)
+    columns = list()
+    for arg in args:
+        tmp = [1,1,1]
+        orig = arg.split(":")
+        tmp[0] = int(orig[0])
+        tmp[1] = int(orig[1] if len(orig)>1 else tmp[0] )
+        tmp[2] = int(orig[2] if len(orig)>2 else 1 )
+        if options.reverse and tmp[1] < tmp[0]:
+            tmp[2] = -abs(tmp[2])
+            tmp[1] = tmp[1]-2
+        columns.append(list(range(tmp[0]-1, tmp[1], tmp[2])))
+        #print(columns[-1])
+    for line in lines:
+        line = line.rstrip('\n')
+        line = line.split(options.insep)
+        flag = 0;
+        for column in columns:
+            for x in column:
+                if x < len(line):
+                    if(flag):
+                        print(options.outsep, end="")
+                    try:
+                        if(options.strip):
+                            print(line[x].strip(), end="")
+                        else:
+                            print(line[x], end="")
+                        flag = 1
+                    except Exception as e: continue
+        if flag: print(options.lastsep)
+
+main()
