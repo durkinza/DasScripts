@@ -13,6 +13,7 @@ Usage: getcol [options]
 	  -r                    allow printing columns in reverse order
 
 ex.
+
 	cat << EOF > data.txt
 	0 1 2 3 4 5 6 7
 	000 001 010 011 100 101 110 111
