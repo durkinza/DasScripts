@@ -17,7 +17,7 @@ key files are created with a maximum key size and maximum data size and maximum 
 		-p		For setting number of rows in file (default: 64)
 		-v		For setting max value size of file (default: 331)
 
-
+Ex.
 
 	key -k60 -v61 -p62 data.key
 	key -n data.key
