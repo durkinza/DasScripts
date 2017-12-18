@@ -45,7 +45,7 @@ def main():
                                 metavar="STR", action="store",
                                 help="Json Data name  default: data",
                                 default="data")
-    parser.add_argument("columns", metavar="column", nargs="+",
+    parser.add_argument("columns", metavar="column", nargs="*",
                                 help="columns to be displayed")
     options = parser.parse_args()
     args = options.columns
