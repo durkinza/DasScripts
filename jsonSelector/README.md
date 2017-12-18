@@ -35,12 +35,12 @@ Ex.
 	{ "data":[
 		{
 		"id":23,
-		"name":"John",
+		"Name":"John",
 		"LastName":"Smith",
 		"Time":"Today"
 		},{
 		"id":24,
-		"name":"Bill",
+		"Name":"Bill",
 		"LastName":"Smith",
 		"Time":""
 		},{
@@ -96,8 +96,8 @@ Ex.
 	
 	Noon
 
-	jsonSelector -i json.json id -s Noon
-	25
+	jsonSelector -i json.json id Time -s Noon
+	25 Noon
 	
 	jsonSelector -i json.json id -S Name Bill
 	24

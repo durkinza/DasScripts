@@ -1,59 +1,20 @@
 #!/usr/bin/env python3
 
 #from optparse import OptionParser
-from argparse import ArgumentParser
+from argparse import ArgumentParser, FileType
 import json
 import sys
 
 def main():
-    #parser = OptionParser(version="%prog 1.0")
     parser = ArgumentParser()
-    """parser.add_option("-i", "--infile", dest="infile",
-                                type="string", metavar="FILE", action="store",
-                                help="input file",
-                                default="")
-    parser.add_option("-o", "--outfile", dest="outfile",
-                                type="string", metavar="FILE", action="store",
-                                help="output file",
-                                default="")
-    parser.add_option("-a", "--all", dest="listall", action="store_true",
-                                help="List all columns",
-                                default=False)
-    parser.add_option("-d", "--describe", dest="describe", action="store_true",
-                                help="List column names and exit",
-                                default=False)
-    parser.add_option("-e", "--printEmpty", dest="iempty", action="store_false",
-                                help="print empty rows",
-                                default=True)
-    parser.add_option("-l", "--listColumnNames", dest="listR", action="store_true",
-                                help="List column names above rows",
-                                default=False)
-    parser.add_option("-q", "--quiet", dest="quiet", action="store_false",
-                                help="suppress warnings",
-                                default=True)
-    parser.add_option("-r", "--removeDuplicates", dest="rmd", action="store_true",
-                                help="Remove duplicate rows while printing",
-                                default=False)
-    parser.add_option("-s", "--search", dest="search", action="append",
-                                help="Show only rows with this value",
-                                type="string", metavar="VALUE")
-    parser.add_option("-S", "--Search", dest="searchcol", action="append",
-                                help="Show only rows with given value in given column",
-                                type="string", nargs=2, metavar='COLUMN VALUE')
-    parser.add_option("-w", "--dataWrapper", dest="dataName",
-                                type="string", metavar="STR", action="store",
-                                help="Json Data name  default: data",
-                                default="data")
-    (options, args) = parser.parse_args()
-    """
     parser.add_argument("-i", "--infile", dest="infile",
-                                 metavar="FILE", action="store",
-                                #type=argparse.FileType('r',0),
+                                metavar="FILE", action="store",
+                                #type=FileType('r', 0),
                                 help="input file",
                                 default="")
     parser.add_argument("-o", "--outfile", dest="outfile",
-                                #type=argparse.FileType('wb', 0),
                                 metavar="FILE", action="store",
+                                #type=FileType('wb', 0),
                                 help="output file",
                                 default="")
     parser.add_argument("-a", "--all", dest="listall", action="store_true",
@@ -89,15 +50,14 @@ def main():
     options = parser.parse_args()
     args = options.columns
     # open input file or stdin
-    if options.infile != "":
+    if options.infile:
         inf = open(options.infile, 'r')
     else:
         if(options.quiet):
             print("No input file, reading from stdin")
-        stin = sys.stdin.readlines()
-        inf = stin
+        inf = sys.stdin
     # open output file or stdout
-    if options.outfile != "":
+    if options.outfile:
         outf = open(options.outfile, 'w')
     else:
         outf = sys.stdout
