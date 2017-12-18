@@ -1,14 +1,18 @@
 # JSON SELECTOR
 
 
-	Usage: jsonSelector [options]
+	usage: jsonSelector [-h] [-i FILE] [-o FILE] [-a] [-d] [-e] [-l] [-q] [-r]
+	                    [-s VALUE] [-S COLUMN VALUE COLUMN VALUE] [-w STR]
+	                    column [column ...]
 	
-	Options:
-	  --version             show program's version number and exit
+	positional arguments:
+	  column                columns to be displayed
+	
+	optional arguments:
 	  -h, --help            show this help message and exit
-	  -i FILE, --infile=FILE
+	  -i FILE, --infile FILE
 	                        input file
-	  -o FILE, --outfile=FILE
+	  -o FILE, --outfile FILE
 	                        output file
 	  -a, --all             List all columns
 	  -d, --describe        List column names and exit
@@ -18,8 +22,12 @@
 	  -q, --quiet           suppress warnings
 	  -r, --removeDuplicates
 	                        Remove duplicate rows while printing
-	  -w STR, --dataWrapper=STR
-	                        Json Data name  default: data
+	  -s VALUE, --search VALUE
+	                        Show only rows with this value
+	  -S COLUMN VALUE COLUMN VALUE, --Search COLUMN VALUE COLUMN VALUE
+	                        Show only rows with given value in given column
+	  -w STR, --dataWrapper STR
+	                        Json Data name default: data
 
 Ex.
 	
@@ -52,10 +60,9 @@ Ex.
 	LastNme
 	Time
 	
-	jsonSelector -i json.json id
-	23
-	24
-	24
+	jsonSelector -i json.json Time
+	Today
+	Noon
 	
 	jsonSelector -i json.json -o json.txt id
 	cat json.txt
@@ -88,9 +95,12 @@ Ex.
 	Today
 	
 	Noon
+
+	jsonSelector -i json.json id -s Noon
+	25
 	
-	jsonSelector -i json Time
-	Today
-	Noon
+	jsonSelector -i json.json id -S Name Bill
+	24
+	
 	
 	

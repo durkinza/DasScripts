@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 
-from optparse import OptionParser
+#from optparse import OptionParser
+from argparse import ArgumentParser
 import json
 import sys
 
 def main():
-    parser = OptionParser(version="%prog 1.0")
-    parser.add_option("-i", "--infile", dest="infile",
+    #parser = OptionParser(version="%prog 1.0")
+    parser = ArgumentParser()
+    """parser.add_option("-i", "--infile", dest="infile",
                                 type="string", metavar="FILE", action="store",
                                 help="input file",
                                 default="")
@@ -32,11 +34,61 @@ def main():
     parser.add_option("-r", "--removeDuplicates", dest="rmd", action="store_true",
                                 help="Remove duplicate rows while printing",
                                 default=False)
+    parser.add_option("-s", "--search", dest="search", action="append",
+                                help="Show only rows with this value",
+                                type="string", metavar="VALUE")
+    parser.add_option("-S", "--Search", dest="searchcol", action="append",
+                                help="Show only rows with given value in given column",
+                                type="string", nargs=2, metavar='COLUMN VALUE')
     parser.add_option("-w", "--dataWrapper", dest="dataName",
                                 type="string", metavar="STR", action="store",
                                 help="Json Data name  default: data",
                                 default="data")
     (options, args) = parser.parse_args()
+    """
+    parser.add_argument("-i", "--infile", dest="infile",
+                                 metavar="FILE", action="store",
+                                #type=argparse.FileType('r',0),
+                                help="input file",
+                                default="")
+    parser.add_argument("-o", "--outfile", dest="outfile",
+                                #type=argparse.FileType('wb', 0),
+                                metavar="FILE", action="store",
+                                help="output file",
+                                default="")
+    parser.add_argument("-a", "--all", dest="listall", action="store_true",
+                                help="List all columns",
+                                default=False)
+    parser.add_argument("-d", "--describe", dest="describe", action="store_true",
+                                help="List column names and exit",
+                                default=False)
+    parser.add_argument("-e", "--printEmpty", dest="iempty", action="store_false",
+                                help="print empty rows",
+                                default=True)
+    parser.add_argument("-l", "--listColumnNames", dest="listR", action="store_true",
+                                help="List column names above rows",
+                                default=False)
+    parser.add_argument("-q", "--quiet", dest="quiet", action="store_false",
+                                help="suppress warnings",
+                                default=True)
+    parser.add_argument("-r", "--removeDuplicates", dest="rmd", action="store_true",
+                                help="Remove duplicate rows while printing",
+                                default=False)
+    parser.add_argument("-s", "--search", dest="search", action="append",
+                                help="Show only rows with this value",
+                                metavar="VALUE")
+    parser.add_argument("-S", "--Search", dest="searchcol", action="append",
+                                help="Show only rows with given value in given column",
+                                nargs=2, metavar='COLUMN VALUE')
+    parser.add_argument("-w", "--dataWrapper", dest="dataName",
+                                metavar="STR", action="store",
+                                help="Json Data name  default: data",
+                                default="data")
+    parser.add_argument("columns", metavar="column", nargs="+",
+                                help="columns to be displayed")
+    options = parser.parse_args()
+    args = options.columns
+    # open input file or stdin
     if options.infile != "":
         inf = open(options.infile, 'r')
     else:
@@ -44,51 +96,69 @@ def main():
             print("No input file, reading from stdin")
         stin = sys.stdin.readlines()
         inf = stin
+    # open output file or stdout
     if options.outfile != "":
         outf = open(options.outfile, 'w')
     else:
         outf = sys.stdout
+    # read in the json file
     values = json.load(inf)
-    #print(values)
+
+    # if we should descirbe the json or output it
     if options.describe:
-        L=1
+        # if describe, read rows and output column names
+        L = 1
+        # make a list of all column names in first row
         for c in values[options.dataName][0].keys():
             if len(str(c)) > L:
                 L = len(str(c))
-        L=L+2
+        L = L + 2
+        # output each column name
         for c in values[options.dataName][0].keys():
             outf.write(str(c)+"\n")
-            ##outf.write(str(len(str((values[options.dataName][0].keys())[:,0])).max()))
-            #outf.write("-"*L+"\n")
-            #outf.write("|"+str(c)+(" "*(L-2-len(str(c))))+"|\n")
-        #outf.write("-"*L+'\n')
     else:
-        output = []
-        arguments = args
+        # if we are not describing, we're output rows
+        output = []  # the output we will print at the end
+        arguments = args  # a list of all columns asked for
+        # if we should list all columns
         if options.listall:
+            # if we list all columns, then add all column names to arguments
             for x in values[options.dataName][0].keys():
                 arguments.append(x)
+        # if we should list column names above each row
         if(options.listR):
+            # start the output with an empty string that we can add to
             output.append("")
+            # for each argument asked for, output that as a column
             for arg in arguments:
                 output[0] = output[0] + (str(arg)+" ")
-                #outf.write(str(arg)+" ")
-            #outf.write("\n")
-        i = 1
+        i = 1  # counter
+        # start going through the json
         for row in values[options.dataName]:
             i = i+1
-            flag = False
-            out = ""
-            for arg in arguments:
-                if(arg in row):
-                    if(row[arg] !=""):
-                        flag = True
-                    out = out +(str(row[arg])+" ")
-            if( not( not flag and options.iempty)):
-                if not(out in output and options.rmd):
+            flag = False  # flag for is row is empty (so it can be ignored)
+            out = ""  # output for current row
+            for arg in arguments:  # for each column asked for
+                if arg in row:  # if the column exists in the row
+                    if row[arg] != "":  # if the data is not empty
+                        if not options.search and not options.searchcol:
+                            flag = True
+                        else:
+                            if options.search:
+                                for v in options.search:
+                                    if v in str(row[arg]):
+                                        flag = True
+                            if options.searchcol:
+                                flag2 = 0
+                                for k, v in options.searchcol:
+                                    if v in str(row[k]):
+                                        flag2 = flag2 + 1
+                                if flag2 >= len(options.searchcol):
+                                    flag = True
+                    out = out + (str(row[arg]) + " ")
+            if not (not flag and options.iempty):  # if empty but we don't care
+                if not (out in output and options.rmd): # check for duplicates
                     output.append(out)
-                #outf.write(out)
-                #outf.write("\n")
         for r in output:
             outf.write(str(r)+'\n')
     if inf is not sys.stdin:
