@@ -1,6 +1,6 @@
 # Get Columns
 
-Usage: getcol [options]
+	Usage: getcol [options]
 
 	Options:
 	  --version             show program's version number and exit
