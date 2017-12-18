@@ -23,7 +23,7 @@
 
 Ex.
 	
-	cat << EOF > json.josn
+	cat << EOF > json.json
 	{ "data":[
 		{
 		"id":23,
