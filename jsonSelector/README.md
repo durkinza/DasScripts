@@ -43,6 +43,7 @@ Ex.
 		}
 	]
 	}
+	EOF
 	
 	
 	jsonSelector -i json.json -d
