@@ -10,12 +10,12 @@ def main():
     parser.add_argument("-i", "--infile", dest="infile",
                                 metavar="FILE", action="store",
                                 #type=FileType('r', 0),
-                                help="input file",
+                                help="input file (default: stdin)",
                                 default="")
     parser.add_argument("-o", "--outfile", dest="outfile",
                                 metavar="FILE", action="store",
                                 #type=FileType('wb', 0),
-                                help="output file",
+                                help="output file (default: stdout)",
                                 default="")
     parser.add_argument("-a", "--all", dest="listall", action="store_true",
                                 help="List all columns",
@@ -43,7 +43,7 @@ def main():
                                 nargs=2, metavar='COLUMN VALUE')
     parser.add_argument("-w", "--dataWrapper", dest="dataName",
                                 metavar="STR", action="store",
-                                help="Json Data name  default: data",
+                                help="Json Data name (default: data)",
                                 default="data")
     parser.add_argument("columns", metavar="column", nargs="*",
                                 help="columns to be displayed")
