@@ -20,6 +20,12 @@ def main():
     parser.add_argument("-a", "--all", dest="listall", action="store_true",
                                 help="List all columns",
                                 default=False)
+    parser.add_argument("-c", "--count", dest="count", action="store_true",
+                                help="display number of rows found",
+                                default=False)
+    parser.add_argument("-C", "--countOnly", dest="countO", action="store_true",
+                                help="only display number of rows",
+                                default=False)
     parser.add_argument("-d", "--describe", dest="describe", action="store_true",
                                 help="List column names and exit",
                                 default=False)
@@ -49,6 +55,9 @@ def main():
                                 help="columns to be displayed")
     options = parser.parse_args()
     args = options.columns
+    # if no columns are given, say so
+    if not args and not options.describe and not options.listall:
+        print("No columns to display")
     # open input file or stdin
     if options.infile:
         inf = open(options.infile, 'r')
@@ -73,9 +82,12 @@ def main():
             if len(str(c)) > L:
                 L = len(str(c))
         L = L + 2
+        if options.count or options.countO:
+            print("Columns: "+str(L))
         # output each column name
-        for c in values[options.dataName][0].keys():
-            outf.write(str(c)+"\n")
+        if not options.countO:
+            for c in values[options.dataName][0].keys():
+                outf.write(str(c)+"\n")
     else:
         # if we are not describing, we're output rows
         output = []  # the output we will print at the end
@@ -119,8 +131,11 @@ def main():
             if not (not flag and options.iempty):  # if empty but we don't care
                 if not (out in output and options.rmd): # check for duplicates
                     output.append(out)
-        for r in output:
-            outf.write(str(r)+'\n')
+        if options.count or options.countO:
+            print("Rows: "+str(len(output)))
+        if not options.countO:
+            for r in output:
+                outf.write(str(r)+'\n')
     if inf is not sys.stdin:
         inf.close()
     if outf is not sys.stdout:
