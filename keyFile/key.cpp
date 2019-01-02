@@ -1,7 +1,12 @@
-/* Author: Zane Durkin <durk7832@vandals.uidaho.edu>
+/* Author: Zane Durkin <zane@neverlanctf.org>
  * File: key.cpp
+ *
+ * String compression by smaz <https://github.com/antirez/smaz>
+ * Key hashing by Robert Heckendorn 
  * 
+ * Sorry for the mess.
  */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -9,9 +14,7 @@
 #include <cerrno>
 #include <fcntl.h>
 
-
 #include "smaz.h"
-
 
 // define functions
 unsigned int hash(const char *str);
@@ -20,6 +23,7 @@ int openFile(char * fn, int &k, int &v, int &p);
 int getData(char * fn, int pfd, char * key, int q, int k, int v, int p);
 int setData(char * fn, int pfd, char * key, int noOver, int q, int k, int v, int p);
 unsigned int hash(const char *str);
+
 int d = 0; // global debug option
 
 int main(int argc, char*  argv[]){
@@ -186,9 +190,9 @@ int openFile(char * fn, int &k, int &v, int &p){
 
 int getData(char * fn, int pfd, char * key, int q, int k, int v, int p){
 	key[k] = '\0';
-	unsigned int h = hash(key);							// get hash of key
+	unsigned int h = hash(key);					// get hash of key
 	int rowSize = k+v+(2*sizeof(int));			// find the max row size
-	unsigned int position = ((h%p)*rowSize);				// find the position in the file that this key should start at
+	unsigned int position = ((h%p)*rowSize);	// find the position in the file that this key should start at
 	position += (4+(3*sizeof(int)));			// find how many bits must be moved to get to the specified row, including header data
 	lseek(pfd, position, SEEK_SET);				// seek the position
 	int keyS;									// int to hold the size of the key in the file
@@ -228,7 +232,6 @@ int getData(char * fn, int pfd, char * key, int q, int k, int v, int p){
 	read(pfd, value, valueSize);				// read the value
     char decompressed[v];
     int dcomprlen = smaz_decompress(value,valueSize,decompressed,sizeof(decompressed));
-	decompressed[dcomprlen] = '\0'; // check that the string end with a null value
 	if(d == 1){ // debug
 		printf("DEBUG(key): hash: %d\n", h);
 		printf("DEBUG(key): position: %d\n",position);
@@ -238,9 +241,9 @@ int getData(char * fn, int pfd, char * key, int q, int k, int v, int p){
 		printf("DEBUG(key): Decompressed Value: %s\n", decompressed);
 		printf("DEBUG(key): Decompressed ValueSize: %d\n", dcomprlen);
 	}
-	printf("%s", decompressed);						// output the value found
+	printf("%s\n", decompressed);					// output the value found
 	//free(value);								// clear up some memory
-	//free(keyFound);
+	free(keyFound);
 	return 0;
 }
 
@@ -259,7 +262,7 @@ int setData(char * fn, int pfd, char * key, int noOver, int q, int k, int v, int
 	int keyS;									// get ready to search for key size
 	char * keyV = (char *) malloc(v);			// get ready to search for key value
 	int rowsUsed=0;								// keep track of which row the key is in
-	while(((pread(pfd, &keyS, sizeof(int), position+(rowsUsed*rowSize)) != -1) && keyS != 0 )
+	while(((pread(pfd, &keyS, sizeof(int), position+(rowsUsed*rowSize)) != -1) && keyS > 0 )
 												// while the row can be read, and the key size is not 0
 			&&(pread(pfd, keyV, keyS, position+(rowsUsed*rowSize)+(sizeof(int)*2)) && (strcmp(keyV, key) !=0)))
 												// and while the key's value doesn't match the given key's value
