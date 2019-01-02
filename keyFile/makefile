@@ -8,7 +8,7 @@ OBJS=\
 key.o\
 smaz.o
 
-HDRS=
+HDRS= smaz.h
 
 CXX=g++
 
@@ -38,4 +38,4 @@ clean :
 	rm -f $(OBJS) $(BIN) core
 	
 clobber :
-	rm -f $(OBJS) $(BIN) core $(BIN) $(BIN).tar
+	rm -f $(OBJS) $(BIN) core $(BIN).tar
