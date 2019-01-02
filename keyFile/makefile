@@ -35,7 +35,7 @@ debug : $(OBJS)
 	$(dbug) $(BIN)
 
 clean :
-	rm -f $(OBJS) $(BIN) core
+	rm -f $(OBJS) $(BIN)
 	
 clobber :
-	rm -f $(OBJS) $(BIN) core $(BIN).tar
+	rm -f $(OBJS) $(BIN) $(BIN).tar
