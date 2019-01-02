@@ -10,6 +10,9 @@
 #include <fcntl.h>
 
 
+#include "smaz.h"
+
+
 // define functions
 unsigned int hash(const char *str);
 int makeFile(char * fn, int k, int v, int p);
@@ -187,7 +190,7 @@ int getData(char * fn, int pfd, char * key, int q, int k, int v, int p){
 	int rowSize = k+v+(2*sizeof(int));			// find the max row size
 	unsigned int position = ((h%p)*rowSize);				// find the position in the file that this key should start at
 	position += (4+(3*sizeof(int)));			// find how many bits must be moved to get to the specified row, including header data
-	lseek(pfd, position, SEEK_SET);				// seek the the position
+	lseek(pfd, position, SEEK_SET);				// seek the position
 	int keyS;									// int to hold the size of the key in the file
 	char * keyV = (char *) malloc(v);			// char to hold the value of the key in the file
 	int rowsUsed=0;								// counter to keep track of the row (for if multiple rows have the same hash)
@@ -223,16 +226,21 @@ int getData(char * fn, int pfd, char * key, int q, int k, int v, int p){
 	char * keyFound = (char *)malloc(valueSize);// get ready to read the key
 	read(pfd, keyFound, keySize);				// read the key 
 	read(pfd, value, valueSize);				// read the value
+    char decompressed[v];
+    int dcomprlen = smaz_decompress(value,valueSize,decompressed,sizeof(decompressed));
+	decompressed[dcomprlen] = '\0'; // check that the string end with a null value
 	if(d == 1){ // debug
 		printf("DEBUG(key): hash: %d\n", h);
 		printf("DEBUG(key): position: %d\n",position);
 		printf("DEBUG(key): keySize: %d\n", keySize);
 		printf("DEBUG(key): valueSize: %d\n", valueSize);
 		printf("DEBUG(key): keyFound: %s\n", keyFound);
+		printf("DEBUG(key): Decompressed Value: %s\n", decompressed);
+		printf("DEBUG(key): Decompressed ValueSize: %d\n", dcomprlen);
 	}
-	printf("%s", value);						// output the value found
-	free(value);								// clear up some memory
-	free(keyFound);
+	printf("%s", decompressed);						// output the value found
+	//free(value);								// clear up some memory
+	//free(keyFound);
 	return 0;
 }
 
@@ -258,7 +266,8 @@ int setData(char * fn, int pfd, char * key, int noOver, int q, int k, int v, int
 	{
 												// move through the rows of the file, until either an empty row is found,
 		rowsUsed++;								//	or until the requested row is found
-		if(d==1)printf("DEBUG(key): row used, moveing to row: %d\n", rowsUsed);
+		if(d==1)printf("DEBUG(key): row used, moving to row: %d\n", rowsUsed);
+		if(d==1)printf("DEBUG(key): Key size: %d\n", keyS);
 	}
 	if(noOver!=0  && (strcmp(keyV, key) == 0)){	// if the key was already used, and no-overwrite mode is active, output an error
 		if(q!=1)printf("ERROR(key): attempt to overwrite record for key '%s' when in no-overwrite mode\n", key);
@@ -274,17 +283,26 @@ int setData(char * fn, int pfd, char * key, int noOver, int q, int k, int v, int
 		value[i] = buf[0];						// transfer each character into the value string
 		i++;									// move to next character in value string
 	}
-	int valueSize = strlen(value);				// using strlen because sizeof will return size of array and not size of string
+    
+    char compressed[v];
+    int valueSize = smaz_compress(value,strlen(value),compressed,sizeof(compressed));
+	if(valueSize > sizeof(compressed)){
+		printf("ERROR(key): compression failed, compressed value larger than row allows: %d > %lu\n", valueSize, sizeof(compressed));
+	}
 	if(d==1){ // debug
 		printf("DEBUG(key): key: %s\n", key);
 		printf("DEBUG(key): keySize: %d\n", keySize);
 		printf("DEBUG(key): value: %s\n", value);
-		printf("DEBUG(key): valueSize: %d\n", valueSize);
+		printf("DEBUG(key): valueSize: %lu\n", strlen(value));
+		printf("DEBUG(key): Compressed value: %s\n", compressed);
+		printf("DEBUG(key): Compressed valueSize: %d\n", valueSize);
+		printf("DEBUG(key): Compression ratio: %f%%\n", (1.00-((double)valueSize/(double)strlen(value)))*100);
 	}
 	write(pfd, &keySize, sizeof(int));			// write key size to the start of the row
 	write(pfd, &valueSize, sizeof(int));		// write value size to the start of the row
 	write(pfd, key, keySize);					// write key to the row
-	write(pfd, value, valueSize);				// write value to the row
+	//write(pfd, value, valueSize);				// write value to the row
+	write(pfd, compressed, valueSize);				// write value to the row
 
 	return 0;
 }

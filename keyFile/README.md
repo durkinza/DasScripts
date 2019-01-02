@@ -33,3 +33,6 @@ Ex.
 	key -g data.key Name
 	John 
 
+
+Compression of strings is done with the Smaz libarary
+https://github.com/antirez/smaz
