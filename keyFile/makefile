@@ -16,7 +16,7 @@ dbug=gdb
 
 LIBS=
 
-CXXFLAGS=-O3 -g -Wall -pedantic -Wno-write-strings -Wno-vla-extension 
+CXXFLAGS=-O3 -g -Wall -pedantic -Wno-write-strings -Wno-vla 
 #-Wc++11-compat-deprecated-writable-strings
 #CXXFLAGS=-g -Wall # use for debugging code
 

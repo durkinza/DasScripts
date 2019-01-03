@@ -241,9 +241,7 @@ int getData(char * fn, int pfd, char * key, int q, int k, int v, int p){
 		printf("DEBUG(key): Decompressed Value: %s\n", decompressed);
 		printf("DEBUG(key): Decompressed ValueSize: %d\n", dcomprlen);
 	}
-	printf("%s\n", decompressed);					// output the value found
-	//free(value);								// clear up some memory
-	free(keyFound);
+	printf("%s", decompressed);					// output the value found
 	return 0;
 }
 
@@ -286,10 +284,9 @@ int setData(char * fn, int pfd, char * key, int noOver, int q, int k, int v, int
 		value[i] = buf[0];						// transfer each character into the value string
 		i++;									// move to next character in value string
 	}
-    
     char compressed[v];
     int valueSize = smaz_compress(value,strlen(value),compressed,sizeof(compressed));
-	if(valueSize > sizeof(compressed)){
+	if(valueSize > (int)sizeof(compressed)){
 		printf("ERROR(key): compression failed, compressed value larger than row allows: %d > %lu\n", valueSize, sizeof(compressed));
 	}
 	if(d==1){ // debug
