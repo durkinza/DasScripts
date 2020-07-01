@@ -127,7 +127,7 @@ def main():
                                         flag2 = flag2 + 1
                                 if flag2 >= len(options.searchcol):
                                     flag = True
-                    out = out + (str(row[arg]) + " ")
+                    out = out + (str(row[arg]) + ", ")
             if not (not flag and options.iempty):  # if empty but we don't care
                 if not (out in output and options.rmd): # check for duplicates
                     output.append(out)
